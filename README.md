@@ -3,7 +3,7 @@
 ## Build & Run ##
 
 ```sh
-$ cd Assignment1
+$ cd Scalatra-Assingment
 $ sbt
 > ~;jetty:stop;jetty:start
 ```
