@@ -1,4 +1,4 @@
-# Assignment1 #
+# Assignment2 #
 
 ## Build & Run ##
 
@@ -8,15 +8,23 @@ $ sbt
 > ~;jetty:stop;jetty:start
 ```
 
-GET [http://localhost:8080/messages/](http://localhost:8080/messages/) - returns list of all messages
+POST [http://localhost:8080/register/](#) - Register new user. Pass email, login, password in body
 
-GET [http://localhost:8080/messages/id](http://localhost:8080/messages/1) - returns message with specified id
+POST [http://localhost:8080/login/](#) - Authentication. JWT is returned.
 
-POST [http://localhost:8080/messages/](http://localhost:8080/messages/) - adds new message with specified id and text if message with such id does not exist
+*Pass JWT in Authorization header in below requests*
 
-PUT [http://localhost:8080/messages/id](http://localhost:8080/messages/id) - changes text of the message with specified id if message with such id exists
+POST [http://localhost:8080/create_tweet/](#) - Creates new tweet. Pass tweet body.
 
-DELETE [http://localhost:8080/messages/id](http://localhost:8080/messages/id) - removes message with specified id if message with such id exists
+PUT [http://localhost:8080/edit_tweet/](#) - Edits created tweet. Pass tweet id and new tweet body.
+
+DELETE [http://localhost:8080/remove_tweet/](#) - Removes tweet with specified id.
+
+GET [http://localhost:8080/subscribe/](#) - Subscribe to user with specified id
+
+GET [http://localhost:8080/feed/](#) - Get feed of the current user
+
+GET [http://localhost:8080/feed/id](#) - Get feed of a user with specified id
 
 
 
