@@ -19,6 +19,7 @@ libraryDependencies ++= Seq(
 )
 libraryDependencies += "org.scalatra" %% "scalatra-json" % "2.6.2"
 libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.0-M2"
+libraryDependencies += "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5"
 
 enablePlugins(SbtTwirl)
 enablePlugins(ScalatraPlugin)
