@@ -20,7 +20,7 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
   case class User(id: Int, email: String, login: String, password: String)
 
   var userDB = List[User]()
-  val tokens = mutable.Map[String, String]()
+  //val tokens = mutable.Map[String, String]()
   private var tweets = List[Tweet]()
   private var tweetId = 0
   private var userId_ = 0
@@ -51,11 +51,12 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  post("/register/") {
+  post("/register/?") {
     val parsedData = parse(request.body).extract[Map[String, String]]
     val (email, login, password) = (parsedData("email"), parsedData("login"), parsedData("password"))
 
     // TODO: Add password hashing
+    //MessageDigest.getInstance("SHA-256").digest(password.getBytes("UTF-8"))
     val newUser = User(userId_, email, login, password)
 
     // check if user id and email are unique
@@ -64,12 +65,13 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
     else {
       // add new user
       userDB = userDB :+ newUser
+      subscriptions.update(userId_, mutable.ListBuffer[Int]())
       userId_ += 1
       Map("result" -> Ok("Successfully registered"))
     }
   }
 
-  post("/login/") {
+  post("/login/?") {
     val parsedData = parse(request.body).extract[Map[String, String]]
     val login = parsedData("login")
     val password = parsedData("password")
@@ -90,7 +92,7 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
   }
 
 
-  post("/create_tweet/") {
+  post("/create_tweet/?") {
     val (isValid, token, claimsMap) = validateToken(request)
 
     if (!isValid)
@@ -114,7 +116,7 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  put("/edit_tweet/") {
+  put("/edit_tweet/?") {
     val (isValid, token, claimsMap) = validateToken(request)
 
     if (!isValid)
@@ -126,14 +128,17 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
       val newTweetBody = parsedData("newTweetBody")
       val ownerId = claimsMap.get("id").toInt
 
-      tweets = tweets.filter(_.tweetId != tweetID)
-      tweets = tweets :+ Tweet(ownerId, tweetID, newTweetBody, Calendar.getInstance.getTime)
-
-      Map("result" -> Ok("Tweet successfully edited"))
+      if (tweets.filter(_.tweetId == tweetID).head.ownerId != ownerId)
+        Map("result" -> Forbidden("Tweet edition is not allowed"))
+      else {
+        tweets = tweets.filter(_.tweetId != tweetID)
+        tweets = tweets :+ Tweet(ownerId, tweetID, newTweetBody, Calendar.getInstance.getTime)
+        Map("result" -> Ok("Tweet successfully edited"))
+      }
     }
   }
 
-  delete("/remove_tweet/") {
+  delete("/remove_tweet/?") {
     val (isValid, token, claimsMap) = validateToken(request)
 
     if (!isValid)
@@ -141,19 +146,20 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
 
     else {
       val parsedData = parse(request.body).extract[Map[String, String]]
-      val tweetID = parsedData("tweetId")
-      val ownerId = claimsMap.get("id")
+      val tweetID = parsedData("tweetId").toInt
+      val ownerId = claimsMap.get("id").toInt
 
       // get tweet with provided tweetId
-      if (tweets.filter(_.tweetId == tweetID.toInt).head.ownerId != ownerId)
-        Forbidden("Tweet deletion is not allowed")
-      else
-        tweets = tweets.filter(_.tweetId != tweetID.toInt) // remove tweet with provided tweetId
+      if (tweets.filter(_.tweetId == tweetID).head.ownerId != ownerId)
+        Map("result" -> Forbidden("Tweet deletion is not allowed"))
+      else {
+        tweets = tweets.filter(_.tweetId != tweetID) // remove tweet with provided tweetId
         Map("result" -> Ok("Tweet successfully removed"))
+      }
     }
   }
 
-  get("/subscribe/") {
+  post("/subscribe/?") {
     val (isValid, token, claimsMap) = validateToken(request)
 
     if (!isValid)
@@ -164,12 +170,16 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
       val userId = parsedData("userId").toInt // to whom subscribe
       val currentUserId = claimsMap.get("id").toInt
 
-      subscriptions(userId) += userId
-      Map("result" -> Ok("Successfully subscribed"))
+      userId match {
+        case x if x == currentUserId => Map("result" -> Conflict("Can't self subscribe"))
+        case _ if subscriptions(currentUserId).contains(userId) => Map("result" -> Conflict("Already subscribed"))
+        case _ => subscriptions(currentUserId) += userId
+        Map("result" -> Ok("Successfully subscribed"))
+      }
     }
   }
 
-  get("/feed/") {
+  get("/feed/?") {
     val (isValid, token, claimsMap) = validateToken(request)
 
     if (!isValid)
@@ -186,7 +196,7 @@ class MyScalatraServlet extends ScalatraServlet with JacksonJsonSupport {
     }
   }
 
-  get("/feed/:user_id/") {
+  get("/feed/:user_id/?") {
     val (isValid, token, claimsMap) = validateToken(request)
 
     if (!isValid)
