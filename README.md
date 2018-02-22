@@ -27,4 +27,16 @@ GET [http://localhost:8080/feed/](#) - Get feed of the current user
 GET [http://localhost:8080/feed/id](#) - Get feed of a user with specified id
 
 
+## Testing ##
+
+Start server as described above.
+
+See collection [here](https://documenter.getpostman.com/collection/view/3625254-e6388eef-89de-6980-1bf6-6bb6f812f8f3)
+
+Make sure you have Newman to run tests ()
+
+```sh
+$ newman run https://www.getpostman.com/collections/e1a392c95d77b33ef49d
+```
+
 
