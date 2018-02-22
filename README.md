@@ -31,7 +31,7 @@ GET [http://localhost:8080/feed/id](#) - Get feed of a user with specified id
 
 Start server as described above.
 
-See collection [here](https://documenter.getpostman.com/collection/view/3625254-e6388eef-89de-6980-1bf6-6bb6f812f8f3)
+See collection [here](https://documenter.getpostman.com/view/3625254/testapi/RVg28TTX)
 
 Make sure you have Newman to run tests:
 
